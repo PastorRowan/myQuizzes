@@ -1,14 +1,19 @@
 
 import {
+    setup
+} from "./bootstrapper.js";
+setup;
+import path from "path";
+import { fileURLToPath } from "url";
+
+import {
     app,
     BrowserWindow,
     ipcMain
 } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
 import {
-    startLogin
-} from "./startLogin.js";
+    login
+} from "./login.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +46,6 @@ function main() {
         window.webContents.openDevTools();
     };
 
-    startLogin(window);
+    login(window);
 
 };

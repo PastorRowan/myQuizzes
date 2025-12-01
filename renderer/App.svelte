@@ -15,7 +15,6 @@
 
     import {
         Home,
-        Login,
     } from "./pages/index";
 
     const routes: Routes = [
@@ -23,13 +22,9 @@
             path: "/",
             component: Home,
         },
-        {
-            path: "/login",
-            component: Login,
-        }
     ];
 
-    const start = "/login";
+    const start = "/";
 
 </script>
 

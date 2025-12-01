@@ -6,14 +6,30 @@ export type PromptUserResponse = {
     answer: string;
 };
 
-export async function promptUser(message: string, win: BrowserWindow): Promise<string> {
+export async function promptUser({
+    message,
+    win,
+    validate = (answer: string) => true,
+}: {
+    message: string;
+    win: BrowserWindow;
+    validate?: (answer: string) => boolean;
+}): Promise<string> {
     return new Promise((resolve) => {
         const id = Date.now();
 
         function handler(event: Electron.IpcMainEvent, response: PromptUserResponse) {
-            if (response.id === id) {
+            const {
+                id: responseId,
+                answer
+            } = response;
+            if (responseId === id && validate(answer)) {
                 ipcMain.removeListener("prompt-answer", handler);
-                resolve(response.answer);
+                // Unshows the prompt component
+                // win.webContents.send("prompt-show", { id, message });
+                console.log("answer: ", answer);
+                console.log("typeof answer: ", typeof answer);
+                resolve(answer);
             };
         };
 
