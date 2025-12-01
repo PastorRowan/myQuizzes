@@ -1,0 +1,21 @@
+
+{
+    "extends": "@tsconfig/svelte/tsconfig.json",
+    "compilerOptions": {
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "target": "es2024",
+        "baseUrl": "./",
+        "verbatimModuleSyntax": true,
+        "sourceMap": true,
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "paths": {
+            "@router/*": ["router/*"],
+            "@components/*": ["renderer/components/*"]
+        },
+    },
+    "include": ["renderer/**/*", "router/**/*"],
+    "exclude": ["**/*.svelte"]
+}

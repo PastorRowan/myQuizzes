@@ -1,0 +1,26 @@
+
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Optional REPL history
+.node_repl_history
+
+# Main output typescript
+mainOut/
+
+# Rollup build
+public/build/
+
+# enviroment variables
+.env
+
+# IDE/editor folders and files
+.vscode/
+
+# Mac os
+.DS_Store

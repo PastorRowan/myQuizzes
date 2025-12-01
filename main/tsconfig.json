@@ -1,0 +1,16 @@
+
+{
+    "compilerOptions": {
+        "outDir": "../mainOut",
+        "rootDir": ".",
+        "module": "ESNext",
+        "target": "ESNext",
+        "moduleResolution": "node10",
+        "strict": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "composite": true,
+        "types": ["electron"]
+    },
+    "include": ["**/*.ts"]
+}

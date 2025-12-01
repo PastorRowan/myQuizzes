@@ -1,0 +1,62 @@
+{
+    "name": "myquizes",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "./mainOut/index.js",
+    "scripts": {
+        "dev": "rollup -c -w",
+        "package": "npm run build && electron-builder",
+        "build:main": "tsc -p main/tsconfig.json",
+        "build:renderer": "rollup -c",
+        "build": "npm run build:main && npm run build:renderer",
+        "start": "npm run build && electron ."
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^24.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.0",
+        "@rollup/plugin-terser": "^0.4.0",
+        "@rollup/plugin-typescript": "^12.3.0",
+        "@tsconfig/svelte": "^5.0.6",
+        "@types/express": "^5.0.5",
+        "electron": "^39.2.3",
+        "electron-builder": "^26.0.12",
+        "rollup": "^3.15.0",
+        "rollup-plugin-css-only": "^4.3.0",
+        "rollup-plugin-livereload": "^2.0.0",
+        "rollup-plugin-svelte": "^7.2.2",
+        "rollup-plugin-typescript2": "^0.36.0",
+        "svelte": "^5.44.1",
+        "svelte-preprocess": "^6.0.3",
+        "tslib": "^2.8.1",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "electron-prompt": "^1.7.0",
+        "express": "^5.1.0",
+        "input": "^1.0.1",
+        "phone": "^3.1.67",
+        "sirv-cli": "^2.0.0",
+        "telegram": "^2.26.22"
+    },
+    "build": {
+        "appId": "com.yourapp.id",
+        "productName": "SvelteApp",
+        "directories": {
+            "buildResources": "resources",
+            "output": "dist"
+        },
+        "files": [
+            "!**/node_modules/*/{test,__tests__}/**"
+        ],
+        "win": {
+            "target": "nsis"
+        },
+        "mac": {
+            "target": "dmg"
+        },
+        "linux": {
+            "target": "AppImage"
+        }
+    }
+}
