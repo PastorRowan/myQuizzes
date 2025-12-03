@@ -3,7 +3,7 @@
 
     import {
         goTo,
-    } from "../../router/index";
+    } from "./index";
 
     let inputPath = $state("");
 

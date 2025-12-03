@@ -9,10 +9,23 @@ const WINDOW_API = {
             (_event: any,
                 { id, message }: {id: number; message: string;}
             ) => callback({ id, message })),
-
+    onPromptHide: (callback: any) => {
+        ipcRenderer.on(
+            "prompt-hide",
+            (_event: any) => callback());
+    },
     // Send prompt-answer with { id, answer }
     sendPromptResponse: ({ id, answer }: {id: number, answer: string}) =>
         ipcRenderer.send("prompt-answer", { id, answer }),
+    createPoll: ({
+        poll,
+        channelInviteLink
+    }: {
+        poll: any;
+        channelInviteLink: string;
+    }) => {
+        
+    },
 };
 
 contextBridge.exposeInMainWorld("api", WINDOW_API);

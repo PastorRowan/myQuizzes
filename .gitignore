@@ -18,7 +18,7 @@ public/build/
 
 # enviroment variables
 .env
-.dotenv
+.env example
 
 # IDE/editor folders and files
 .vscode/

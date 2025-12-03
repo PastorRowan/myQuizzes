@@ -2,7 +2,7 @@
 <script lang="ts">
 
     let promptId: number = $state(0);
-    let showPrompt: boolean = $state(false);
+    let show: boolean = $state(false);
     let promptMessage: string = $state("");
     let promptInput: string = $state("");
 
@@ -15,10 +15,17 @@
         id: number,
         message: string
     }) => {
+        console.log("id: ", id);
+        console.log("message: ", message);
         promptId = id;
         promptMessage = message;
         promptInput = "";
-        showPrompt = true;
+        show = true;
+    });
+
+    // @ts-ignore
+    window.api.onPromptHide(() => {
+        show = false;
     });
 
     function submitPrompt() {
@@ -28,13 +35,13 @@
             id: promptId,
             answer: promptInput,
         });
-        showPrompt = false;
     };
 
 </script>
 
 <div
     id="prompt-modal"
+    class={show ? "" : "hidden"}
 >
     <div
         id="prompt-modal-inner"
@@ -57,7 +64,6 @@
 
 <style>
     #prompt-modal {
-        display: none;
         position: fixed;
         top: 0;
         left: 0; 
@@ -67,6 +73,9 @@
         display:flex;
         justify-content:center;
         align-items:center;
+    }
+    #prompt-modal.hidden {
+        display: none;
     }
     #prompt-modal-inner {
         background: white;

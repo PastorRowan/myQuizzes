@@ -32,10 +32,13 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
+        "@json-editor/json-editor": "^2.15.2",
+        "big-integer": "^1.6.52",
         "dotenv": "^17.2.3",
         "electron-prompt": "^1.7.0",
         "express": "^5.1.0",
         "input": "^1.0.1",
+        "monaco-editor": "^0.55.1",
         "phone": "^3.1.67",
         "sirv-cli": "^2.0.0",
         "telegram": "^2.26.22"
