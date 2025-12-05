@@ -10,7 +10,7 @@
         Poll
     } from "../types/index";
 
-    import * as monaco from 'monaco-editor';
+    // import * as monaco from 'monaco-editor';
 
     import { onMount } from "svelte";
 
@@ -46,6 +46,8 @@
     let editor: any;
     let editorContainer: HTMLDivElement;
 
+    /*
+
     onMount(() => {
         // Register your schema
         monaco.json.jsonDefaults.setDiagnosticsOptions({
@@ -64,7 +66,7 @@
             automaticLayout: true,
         });
     });
-
+    */
 
 
     let channelInviteLinkInput: string = $state("");

@@ -3,7 +3,7 @@
 
     import {
         goTo,
-    } from "./index";
+    } from "./path";
 
     let inputPath = $state("");
 

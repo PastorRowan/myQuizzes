@@ -1,1 +1,0 @@
-    import JSONEditor from '@json-editor/json-editor/index.js';

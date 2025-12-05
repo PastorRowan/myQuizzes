@@ -1,9 +1,7 @@
 
 <script lang="ts">
 
-    import {
-        NotFound
-    } from "../renderer/pages/index";
+    import NotFound from "./NotFound.svelte";
 
     import type {
         Route,
