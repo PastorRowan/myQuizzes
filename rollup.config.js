@@ -7,6 +7,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import livereload from "rollup-plugin-livereload";
 import css from "rollup-plugin-css-only";
 import typescript from "@rollup/plugin-typescript";
+import json from '@rollup/plugin-json';
 
 // rollup.config.js
 
@@ -37,9 +38,11 @@ export default {
 	input: "renderer/main.ts",
 	output: {
 		sourcemap: true,
-		format: "iife",
+		format: "es",
 		name: "app",
-		file: "public/build/bundle.js"
+		dir: "public/build",
+        entryFileNames: "bundle.js",
+        chunkFileNames: "[name]-[hash].js"
 	},
 	plugins: [
 
@@ -65,6 +68,8 @@ export default {
             extensions: [".mjs", ".js", ".json", ".node", ".ts", ".svelte"]
 		}),
 
+        json(),
+
 		commonjs(),
 
         typescript({
@@ -77,7 +82,24 @@ export default {
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
-		!production && livereload("public"),
+		!production && livereload({
+            watch: [
+                "renderer",
+                "main",
+                "public"
+            ],
+            verbose: true, // Disable console output
+            delay: 300,
+
+            // other livereload options
+            /*
+            port: 12345,
+            https: {
+                key: fs.readFileSync('keys/agent2-key.pem'),
+                cert: fs.readFileSync('keys/agent2-cert.pem')
+            },
+            */
+        }),
 
 		// If we"re building for production (npm run build
 		// instead of npm run dev), minify

@@ -1,6 +1,5 @@
 
 {
-    "extends": "@tsconfig/svelte/tsconfig.json",
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "bundler",
@@ -16,6 +15,11 @@
             "@components/*": ["renderer/components/*"]
         },
     },
-    "include": ["renderer/**/*", "router/**/*"],
+    "include": [
+        "renderer/**/*",
+        "router/**/*",
+        "helpers/**/*",
+        "types.d.ts"
+    ],
     "exclude": ["**/*.svelte"]
 }

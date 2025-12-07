@@ -17,14 +17,14 @@ const WINDOW_API = {
     // Send prompt-answer with { id, answer }
     sendPromptResponse: ({ id, answer }: {id: number, answer: string}) =>
         ipcRenderer.send("prompt-answer", { id, answer }),
-    createPoll: ({
-        poll,
-        channelInviteLink
+    sendQuestions: ({
+        questions,
+        channelId
     }: {
-        poll: any;
-        channelInviteLink: string;
+        questions: Question[];
+        channelId: string;
     }) => {
-        
+        ipcRenderer.send("send-questions", { questions, channelId })
     },
 };
 

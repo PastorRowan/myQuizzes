@@ -2,102 +2,75 @@
 <script lang="ts">
 
     import {
-        Prompt
+        isQuestions
+    } from "../helpers/validators";
+
+    import {
+        Prompt,
+        JsonEditor
     } from "./components/index";
 
-    import type {
-        Question,
-        Poll
-    } from "../types/index";
-
-    // import * as monaco from 'monaco-editor';
-
-    import { onMount } from "svelte";
-
-    const pollSchema = {
-        type: "array",
-        title: "Poll",
-        items: {
-            type: "object",
-            required: ["question", "options", "correctOption"],
-            properties: {
-                question: {
-                    type: "string",
-                    title: "Question"
-                },
-                options: {
-                    type: "array",
-                    title: "Options",
-                    items: {
-                        type: "string",
-                        title: "Option"
-                    },
-                    minItems: 2
-                },
-                correctOption: {
-                    type: "number",
-                    title: "Correct Option Index",
-                    minimum: 0
-                }
-            }
-        }
-    };
-
-    let editor: any;
-    let editorContainer: HTMLDivElement;
-
-    /*
-
-    onMount(() => {
-        // Register your schema
-        monaco.json.jsonDefaults.setDiagnosticsOptions({
-            validate: true,
-            schemas: [{
-                uri: "http://myserver/myschema.json", // an identifier for your schema
-                fileMatch: ["*"],                      // files to associate with this schema
-                schema: pollSchema                     // your JSON schema object
-            }]
-        });
-
-        // Create editor
-        monaco.editor.create(editorContainer, {
-            value: '[]', // initial JSON text
-            language: 'json',
-            automaticLayout: true,
-        });
-    });
-    */
-
-
-    let channelInviteLinkInput: string = $state("");
+    let channelWebLinkInput: string = $state("");
     let quizJsonTextInput: string = $state("");
+    let jsonEditorApi: any;
+
+    console.log("jsonEditorApi: ", jsonEditorApi);
 
     async function handleSendQuestionsButClick(e: Event) {
 
-        const channelInviteLink: string = channelInviteLinkInput;
+        console.log("jsonEditorApi: ", jsonEditorApi);
 
-        const TELEGRAM_INVITE_REGEX =
-            /^(?:https?:\/\/)?(?:t|telegram)\.(?:me|dog)\/(?:joinchat\/|\+)?([\w-]+)$/i;
+        const channelWebLink: string = channelWebLinkInput;
+
+        const TELEGRAM_WEB_CHANNEL_LINK_REGEX = /web\.telegram\.org\/k\/#(-?\d+)/;
 
         // Validate invite link
-        if (!TELEGRAM_INVITE_REGEX.test(channelInviteLink)) {
-            alert("Invalid channel invite link. It must look like:\nhttps://t.me/+abcd1234xyz or https://t.me/joinchat/abcd1234");
+        if (!TELEGRAM_WEB_CHANNEL_LINK_REGEX.test(channelWebLink)) {
+            alert("Invalid channel link. It must look like:\nhttps://web.telegram.org/k/#-123456789");
             return;
         };
 
-        let poll: Poll;
+        const match = channelWebLink.match(TELEGRAM_WEB_CHANNEL_LINK_REGEX);
+        const rawId: string | null = match ? match[1] : null;
+
+        if (rawId === null) {
+            throw new Error("web channel link is incorrect");
+        };
+
+        console.log("rawId: ", rawId);
+
+        // rawId is something like "-1234567890"
+        const channelId: string = "-100" + rawId.replace(/^-/, "");
+
+        console.log("channelId: ", channelId);
+
+        const TELEGRAM_CHANNEL_ID_REGEX = /^-100\d+$/;
+
+        if (!TELEGRAM_CHANNEL_ID_REGEX.test(channelId)) {
+            alert("Invalid Telegram channel ID format. Should be for example -1001234567890");
+            return;
+        };
+
+        let questions: any;
+        quizJsonTextInput = jsonEditorApi.getValue();
         try {
-            poll = JSON.parse(quizJsonTextInput) as Poll;
+            questions = JSON.parse(quizJsonTextInput);
         } catch (error: any) {
-            alert("Invalid JSON. Please check your quiz format.");
+            alert("Invalid JSON. Please check your quiz json.");
+            return;
+        };
+
+        if (!isQuestions(questions)) {
+            alert("Quiz json is not following the correct schema\nPlease check the text editor");
             return;
         };
 
         // @ts-ignore
-        await window.api.createPoll({
-            poll: poll,
-            channelInviteLink: channelInviteLink,
+        await window.api.sendQuestions({
+            questions: questions,
+            channelId: channelId,
         });
+
     };
 
 </script>
@@ -106,14 +79,12 @@
     <Prompt />
 	<h1>Enter Info</h1>
     <input
-        bind:value={channelInviteLinkInput}
+        bind:value={channelWebLinkInput}
         placeholder="Channel invite link"
     />
-    <div
-        bind:this={editorContainer}
-        id="editor"
-    >
-    </div>
+    <JsonEditor
+        bind:this={jsonEditorApi}
+    />
     <button
         onclick={handleSendQuestionsButClick}
     >Send Questions</button>
@@ -141,12 +112,4 @@
     input {
         min-width: 400px;
     }
-    /*
-    textarea {
-        min-width: 400px;
-        max-width: 700px;
-        min-height: 450px;
-        max-height: 800px;
-    }
-    */
 </style>

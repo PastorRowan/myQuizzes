@@ -73,6 +73,7 @@
         display:flex;
         justify-content:center;
         align-items:center;
+        z-index: 4;
     }
     #prompt-modal.hidden {
         display: none;

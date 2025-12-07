@@ -14,6 +14,10 @@ import {
 } from "./bootstrapper.js";
 import { Buffer } from "buffer"; // Node.js buffer module
 import bigInt from "big-integer";
+import {
+    isChannelId,
+    isQuestions
+} from "../helpers/validators";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,55 +61,124 @@ class TelegramService {
     };
 
     // Creates the quiz based on the quiz json
-    public async sendPoll({
-        inviteLink,
-        alertOnFail = (args: { message: string; }) => Promise.resolve(),
+    public async sendQuestions({
+        channelId,
+        questions,
+        onFail = (error) => {throw error},
     }: {
-        inviteLink: string;
-        alertOnFail?: (args: { message: string; }) => Promise<void>;
-    }) {
+        questions: Question[];
+        channelId: string;
+        onFail?: (error: any) => Promise<void>;
+    }): Promise<void> {
+
+        console.log(
+            "questions: ", questions,
+            "channelId: ", channelId,
+            "onFail: ", onFail
+        );
+
+        try {
+
+            if (!isChannelId(channelId)) {
+                throw new Error(`Invalid channel ID provided: "${channelId}". Please ensure it starts with "-100"`);
+            };
+
+            if (!isQuestions(questions)) {
+                throw new Error(`Invalid questions array provided: ${questions}. Check the format and content of the questions.`);
+            };
+
+            const client = this.getClient();
+            const entity = await client.getEntity(channelId);
+
+            if (!(entity instanceof Api.Channel)) {
+                throw new Error(`The provided channel ID does not correspond to a valid channel.`);
+            };
+
+            const channelEntity: Api.Channel = entity;
+
+            if (!entity.adminRights) {
+                throw new Error("Bot not participant or not admin of channel");
+            };
+
+            for (let i = 0; i < questions.length; i++) {
+                const question: Question = questions[i];
+                await this.sendQuestion({
+                    question: question,
+                    channelEntity: channelEntity,
+                });
+                 // 1-second delay before sending next question
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            };
+        } catch (error: any) {
+            onFail(error);
+        };
+    
+    };
+
+    private getClient() {
+        return this.client;
+    };
+
+    // Creates a quiz based on the question object
+    private async sendQuestion({
+        question,
+        channelEntity,
+        onFail = (error: any) => {throw error},
+    }: {
+        question: Question;
+        channelEntity: Api.Channel;
+        onFail?: (error: any) => Promise<void>;
+    }): Promise<void> {
+
+        console.log(
+            "question: ", question,
+            "onFail: ", onFail
+        );
 
         // Create poll answers
-        const question = new Api.TextWithEntities({
-            text: "Are you a bomba pussy clat man?",
+        const apiQuestionText = new Api.TextWithEntities({
+            text: question.query,
             entities: []
         });
 
-        const answers = [
-            new Api.PollAnswer({
-                text: new Api.TextWithEntities({
-                    text: "Option 1",
-                    entities: []
-                }),
-                option: Buffer.from([0]),
-            }),
-            new Api.PollAnswer({
-                text: new Api.TextWithEntities({
-                    text: "Option 2",
-                    entities: []
-                }),
-                option: Buffer.from([1]),
-            }),
-        ];
+        const options = question.options;
+        const answers: Api.PollAnswer[] = [];
+
+        for (let i = 0; i < options.length; i++) {
+            const optionText = options[i];
+            answers.push(
+                new Api.PollAnswer({
+                    text: new Api.TextWithEntities({
+                        text: optionText,
+                        entities: []
+                    }),
+                    option: Buffer.from([i]),
+                })
+            );
+        };
 
         // Create the poll object
-        const poll = new Api.Poll({
+        const apiPoll = new Api.Poll({
             id: bigInt(Date.now()),
             closed: false,
-            publicVoters: true,
-            multipleChoice: true,
+            // Has to be false because its a channel
+            publicVoters: false,
+            // Has to be false because quizes cannot have multiple choice
+            multipleChoice: false,
             quiz: true,
-            question: question,
+            question: apiQuestionText,
             answers: answers,
             closePeriod: 0,
             closeDate: 0,
         });
 
+        const correctOption = question.correctOption;
+
         // MessageMediaPoll wrapping the poll
         const inputMediaPoll = new Api.InputMediaPoll({
-            poll: poll,
+            poll: apiPoll,
             correctAnswers: [
-                Buffer.from([0])
+                Buffer.from([correctOption])
             ],
         });
 
@@ -113,26 +186,10 @@ class TelegramService {
 
         try {
 
-            inviteLink
-            // Insert invite link here: inviteLink
-            // https://t.me/+EomMiwKObYo1NmM0
-
-            const entity = await client.getEntity("https://t.me/+EomMiwKObYo1NmM0");
-
-            if (!(entity instanceof Api.Channel)) {
-                throw new Error("Provided invite link is not channel link");
-            };
-
-            const channel = entity as Api.Channel; // type-safe now
-
-            if (!channel.adminRights) {
-                throw new Error("Bot not participant or not admin");
-            };
-
             // Send the poll as a message
             await client.invoke(
                 new Api.messages.SendMedia({
-                    peer: channel,
+                    peer: channelEntity,
                     media: inputMediaPoll,
                     message: "", // optional text
                     randomId: bigInt(Date.now()), // unique random ID
@@ -140,52 +197,9 @@ class TelegramService {
             );
 
         } catch (error: any) {
-            switch (error.errorMessage) {
-
-                // client.getEntity error messages
-                case "Invite link is not channel link":
-                    alertOnFail({
-                        message: "Provided invite link is not a channel link",
-                    });
-                    break;
-                case "Bot not participant or not admin":
-                    alertOnFail({
-                        message: "The bot is not a participant or an admin"
-                    });
-                    break;
-                // client.invoke error messages (sending poll)
-                case "PEER_FLOOD":
-                    alertOnFail({
-                        message: "Too many requests sent at once please slow down"
-                    });
-                    break;
-                default:
-                    console.error("An unexpected error occurred:", error);
-                    break;
-            };
-
-            throw error;
+            onFail(error);
         };
 
-    };
-
-    private getClient() {
-        return this.client;
-    };
-
-    private async isAuthorised({ willThrow }: { willThrow: boolean }): Promise<boolean> {
-        const client = this.getClient();
-
-        // Check bot identity
-        const isBot = await client.isBot();
-        if (!isBot) {
-            const msg = "Client is not logged in or is not a bot";
-            if (willThrow) throw new Error(msg);
-            console.error(msg);
-            return false;
-        };
-
-        return true;
     };
 
     // Work in progress

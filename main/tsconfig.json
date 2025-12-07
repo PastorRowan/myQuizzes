@@ -2,7 +2,7 @@
 {
     "compilerOptions": {
         "outDir": "../mainOut",
-        "rootDir": ".",
+        "rootDir": "..",
         "module": "ESNext",
         "target": "ESNext",
         "moduleResolution": "node10",
@@ -12,5 +12,9 @@
         "composite": true,
         "types": ["electron"]
     },
-    "include": ["**/*.ts"]
+    "include": [
+        "**/*.ts",
+        "../types.d.ts",
+        "../helpers/**/*"
+    ]
 }

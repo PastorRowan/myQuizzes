@@ -55,7 +55,7 @@ export async function promptUser({
         };
 
         ipcMain.on("prompt-answer", handler);
-        // win.webContents.send("prompt-show", { id, message });
+        win.webContents.send("prompt-show", { id, message });
 
     });
 };

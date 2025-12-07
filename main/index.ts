@@ -9,13 +9,15 @@ import { fileURLToPath } from "url";
 import {
     app,
     BrowserWindow,
-    ipcMain,
     dialog
 } from "electron";
 import {
     telegramBotService
 } from "./TelegramBotService.js";
 import { promptUser } from "./promptUser.js";
+import {
+    setupIpc
+} from "./ipc.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -33,12 +35,15 @@ function main() {
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
+            webSecurity: false,
             preload: path.join(__dirname, "preload.js"),
             contextIsolation: true,
             nodeIntegration: false,
             sandbox: true,
         },
     });
+
+    setupIpc(window);
 
     window.loadFile(path.join(__dirname, "../public/index.html"));
 
